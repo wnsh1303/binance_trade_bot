@@ -164,8 +164,8 @@ def cal_target(exchange, symbol):
     #전일 데이터와 금일 데이터로 목표가 계산
     yesterday = df.iloc[-2]
     today = df.iloc[-1]
-    long_target = today['open'] + (yesterday['high'] - yesterday['low']) * 0.5
-    short_target = today['open'] - (yesterday['high'] - yesterday['low']) * 0.5
+    long_target = today['open'] + (yesterday['high'] - yesterday['low']) * 0.2
+    short_target = today['open'] - (yesterday['high'] - yesterday['low']) * 0.2
     return long_target, short_target
 
 

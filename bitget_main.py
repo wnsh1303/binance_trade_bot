@@ -270,7 +270,7 @@ short_leverage = exchange.set_leverage(
     params={'holdSide': 'short'}
 )
 
-symbol = 'BTC/USDT'
+symbol = 'BTCUSDT_UMCBL'
 long_target, short_target = cal_target(exchange, symbol)
 
 

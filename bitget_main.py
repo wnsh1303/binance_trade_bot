@@ -77,17 +77,17 @@ def get_profit(update, context):
 
 
 
-def enter_info(order):
-    symbol = order['symbol']
-    if order['info']['side'] == 'BUY':
+def enter_info(fetch):
+    symbol = fetch['symbol']
+    if fetch['side'] == 'buy':
         side = 'Long'
     else:
         side = 'Short'
-    time = str(datetime.datetime.fromtimestamp(math.floor(int(order['info']['updateTime']) / 1000)))
-    price = order['average']
-    amount = order['amount']
+    time = str(datetime.datetime.fromtimestamp(math.floor(int(fetch['timestamp']) / 1000)))
+    price = fetch['info']['priceAvg']
+    amount = fetch['amount']
     lev = int(long_leverage['leverage'])
-    enter_cost = order['cost'] / lev
+    enter_cost = fetch['cost'] / lev
 
     global enter_price
     enter_price = price
@@ -104,17 +104,17 @@ def enter_info(order):
                          'Leverage: ' + str(lev) + 'x'
                     )
 
-def exit_info(order, enter_price):
-    symbol = order['symbol']
-    if order['info']['side'] == 'SELL':
+def exit_info(fetch, enter_price):
+    symbol = fetch['symbol']
+    if fetch['side'] == 'buy':
         side = 'Long'
     else:
         side = 'Short'
-    time = str(datetime.datetime.fromtimestamp(math.floor(int(order['info']['updateTime']) / 1000)))
-    exit_price = order['average']
-    amount = order['amount']
+    time = str(datetime.datetime.fromtimestamp(math.floor(int(fetch['timestamp']) / 1000)))
+    exit_price = fetch['info']['priceAvg']
+    amount = fetch['amount']
     lev = int(long_leverage['leverage'])
-    enter_cost = order['cost'] / lev
+    enter_cost = fetch['cost'] / lev
 
     if side == 'SELL':
         profit = (exit_price - enter_price - (exit_price + enter_price) * fee) * amount
@@ -172,33 +172,63 @@ def cal_target(exchange, symbol):
 #수량 계산
 def cal_amount(usdt_balance, cur_price, portion):
     usdt_trade = usdt_balance * portion
-    amount = math.floor((usdt_trade * 1000000) / cur_price) / 1000000
-    return amount
+    print(usdt_trade)
+    amount = math.floor((usdt_trade * 1000) / cur_price) / 1000
+    print(amount)
+    if usdt_balance < cur_price * 0.001:
+        bot.sendMessage(chat_id=id,
+                        text='[잔고 부족 알림]\n' +
+                             '----------------------------------------\n' +
+                             'USDT가 부족합니다 (Leverage : 1로 가정)')
+
+
+    elif amount < 0.001:
+        bot.sendMessage(chat_id=id,
+                        text='[수량 조정 알림]\n' +
+                             '----------------------------------------\n' +
+                             'USDT가 부족해 수량이 0.001개로 조정됩니다')
+        return 0.001
+
+    else:
+        return amount
+
 
 
 def enter_position(exchange, symbol, cur_price, long_target, short_target, amount, position):
     if cur_price > long_target:
         position['type'] = 'long'
         position['amount'] = amount
-        enter_order = exchange.create_market_buy_order(symbol=symbol, amount=amount)
+        enter_order = exchange.create_market_buy_order(symbol=symbol, amount=amount, params={'reduceOnly':False})
+        time.sleep(1)
+        fetch_enter = exchange.fetch_order(id=enter_order['info']['orderId'], symbol=symbol)
+        enter_info(fetch_enter)
     elif cur_price < short_target:
         position['type'] = 'short'
         position['amount'] = amount
-        enter_order = exchange.create_market_sell_order(symbol=symbol, amount=amount)
+        enter_order = exchange.create_market_sell_order(symbol=symbol, amount=amount, params={'reduceOnly':False})
+        time.sleep(1)
+        fetch_enter = exchange.fetch_order(id=enter_order['info']['orderId'], symbol=symbol)
+        enter_info(fetch_enter)
 
-    enter_info(enter_order)
+
 
 
 def exit_position(exchange, symbol, position):
     amount = position['amount']
     if position['type'] == 'long':
-        exit_order = exchange.create_market_sell_order(symbol=symbol, amount=amount)
+        exit_order = exchange.create_market_sell_order(symbol=symbol, amount=amount, params={'reduceOnly':True})
         position['type'] = None
+        time.sleep(1)
+        fetch_exit = exchange.fetch_order(id=exit_order['info']['orderId'], symbol=symbol)
+        exit_info(fetch_exit, enter_price)
     elif position['type'] == 'short':
-        exit_order = exchange.create_market_buy_order(symbol=symbol, amount=amount)
+        exit_order = exchange.create_market_buy_order(symbol=symbol, amount=amount, params={'reduceOnly':True})
         position['type'] = None
+        time.sleep(1)
+        fetch_exit = exchange.fetch_order(id=exit_order['info']['orderId'], symbol=symbol)
+        exit_info(fetch_exit, enter_price)
 
-    exit_info(exit_order, enter_price)
+
 
 
 
@@ -299,7 +329,7 @@ while True:
                 time.sleep(10)
 
             # 현재가, 구매 가능 수량
-            btc = exchange.fetch_ticker(symbol= symbol)
+            btc = exchange.fetch_ticker(symbol=symbol)
             cur_price = btc['last']
             amount = cal_amount(usdt, cur_price, 0.1)
 
@@ -309,5 +339,8 @@ while True:
             time.sleep(1)
 
         except Exception as e:
-            print(e)
+            bot.sendMessage(chat_id=id,
+                            text='[오류 알림]\n' +
+                             '----------------------------------------\n' +
+                             str(e))
             time.sleep(1)

@@ -196,13 +196,13 @@ def exit_position(exchange, symbol, position):
 
 
 # API 키 읽기
-api_key = '17yGSILSh0ddVktQdMlSTVbteHLsybxNapAL44XXz6lnlWEGCu42oEfIVguKmJWg'
-secret = '9Pj0kvCgcbPW16QrKEUSAT0CjEbIMWrG1xmVnxcUwNL6Dt1wsqPjndJV3wIt3ee0'
+api_key = ''
+secret = ''
 
 
 # 텔레그램
-token = '5486952514:AAFM1qjn4S4yDYNLnyXqs0a4Jtd8-ZoAJPI'
-id = '5050914443'
+token = ''
+id = ''
 
 updater = Updater(token=token, use_context=True)
 dispatcher = updater.dispatcher

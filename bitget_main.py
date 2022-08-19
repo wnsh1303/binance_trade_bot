@@ -235,8 +235,8 @@ def exit_position(exchange, symbol, position):
 
 
 # API 키 읽기
-api_key = 'bg_20e9b1b4daa683360f7f2b21e25a258e'
-secret = '730d0fd42b32a42377a7f6a28556f7b42d04386159b0fd7ec26f9c3326a9de5c'
+api_key = ''
+secret = ''
 bitget_password = 'wnwndl18'
 
 # 텔레그램

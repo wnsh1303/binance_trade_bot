@@ -237,11 +237,11 @@ def exit_position(exchange, symbol, position):
 # API 키 읽기
 api_key = ''
 secret = ''
-bitget_password = 'wnwndl18'
+bitget_password = ''
 
 # 텔레그램
-token = '5558656800:AAHQrewK_Nt5j8HMJ_FPXl61ky-2tGx2Od0'
-id = '5050914443'
+token = ''
+id = ''
 
 updater = Updater(token=token, use_context=True)
 dispatcher = updater.dispatcher

@@ -182,18 +182,20 @@ def cal_amount(usdt_balance, cur_price, portion):
                             text='[잔고 부족 알림]\n' +
                                  '----------------------------------------\n' +
                                  'USDT가 부족합니다 (Leverage : 1로 가정)')
-
+            amount_mode = False
 
         elif amount < 0.001:
             bot.sendMessage(chat_id=id,
                             text='[수량 조정 알림]\n' +
                                  '----------------------------------------\n' +
                                  'USDT가 부족해 수량이 0.001개로 조정됩니다')
+            amount_mode = False
             return 0.001
 
         else:
+            amount_mode = False
             return amount
-        amount_mode = False
+
 
 
 

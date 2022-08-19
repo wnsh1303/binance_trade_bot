@@ -175,22 +175,25 @@ def cal_amount(usdt_balance, cur_price, portion):
     print(usdt_trade)
     amount = math.floor((usdt_trade * 1000) / cur_price) / 1000
     print(amount)
-    if usdt_balance < cur_price * 0.001:
-        bot.sendMessage(chat_id=id,
-                        text='[잔고 부족 알림]\n' +
-                             '----------------------------------------\n' +
-                             'USDT가 부족합니다 (Leverage : 1로 가정)')
+    global amount_mode
+    if amount_mode:
+        if usdt_balance < cur_price * 0.001:
+            bot.sendMessage(chat_id=id,
+                            text='[잔고 부족 알림]\n' +
+                                 '----------------------------------------\n' +
+                                 'USDT가 부족합니다 (Leverage : 1로 가정)')
 
 
-    elif amount < 0.001:
-        bot.sendMessage(chat_id=id,
-                        text='[수량 조정 알림]\n' +
-                             '----------------------------------------\n' +
-                             'USDT가 부족해 수량이 0.001개로 조정됩니다')
-        return 0.001
+        elif amount < 0.001:
+            bot.sendMessage(chat_id=id,
+                            text='[수량 조정 알림]\n' +
+                                 '----------------------------------------\n' +
+                                 'USDT가 부족해 수량이 0.001개로 조정됩니다')
+            return 0.001
 
-    else:
-        return amount
+        else:
+            return amount
+        amount_mode = False
 
 
 
@@ -235,13 +238,13 @@ def exit_position(exchange, symbol, position):
 
 
 # API 키 읽기
-api_key = ''
-secret = ''
-bitget_password = ''
+api_key = 'bg_20e9b1b4daa683360f7f2b21e25a258e'
+secret = '730d0fd42b32a42377a7f6a28556f7b42d04386159b0fd7ec26f9c3326a9de5c'
+bitget_password = 'wnwndl18'
 
 # 텔레그램
-token = ''
-id = ''
+token = '5558656800:AAHQrewK_Nt5j8HMJ_FPXl61ky-2tGx2Od0'
+id = '5050914443'
 
 updater = Updater(token=token, use_context=True)
 dispatcher = updater.dispatcher
@@ -278,6 +281,7 @@ exchange = ccxt.bitget(config={
 
 op_mode = False
 onoff = False
+amount_mode = True
 
 fee = 0.0004
 enter_price = 0
@@ -320,15 +324,16 @@ while True:
                 if op_mode and position['type'] is not None:
                     exit_position(exchange, symbol, position)
                     op_mode = False
+                    amount_mode = True
+
 
             # 목표가 갱신 09:00:20 ~ 09:00:30
             if now.hour == 9 and now.minute == 0 and (20 <= now.second < 30):
                 long_target, short_target = cal_target(exchange, symbol)
-
                 op_mode = True
                 time.sleep(10)
 
-            # 현재가, 구매 가능 수량
+             # 현재가, 구매 가능 수량
             btc = exchange.fetch_ticker(symbol=symbol)
             cur_price = btc['last']
             amount = cal_amount(usdt, cur_price, 0.1)

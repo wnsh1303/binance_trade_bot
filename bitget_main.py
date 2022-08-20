@@ -84,9 +84,9 @@ def enter_info(fetch):
     else:
         side = 'Short'
     time = str(datetime.datetime.fromtimestamp(math.floor(int(fetch['timestamp']) / 1000)))
-    price = fetch['info']['priceAvg']
+    price = fetch['average']
     amount = fetch['amount']
-    lev = int(long_leverage['leverage'])
+    lev = int(long_leverage['data']['longLeverage'])
     enter_cost = fetch['cost'] / lev
 
     global enter_price
@@ -111,9 +111,9 @@ def exit_info(fetch, enter_price):
     else:
         side = 'Short'
     time = str(datetime.datetime.fromtimestamp(math.floor(int(fetch['timestamp']) / 1000)))
-    exit_price = fetch['info']['priceAvg']
+    exit_price = fetch['average']
     amount = fetch['amount']
-    lev = int(long_leverage['leverage'])
+    lev = int(long_leverage['data']['longLeverage'])
     enter_cost = fetch['cost'] / lev
 
     if side == 'SELL':
@@ -172,9 +172,7 @@ def cal_target(exchange, symbol):
 #수량 계산
 def cal_amount(usdt_balance, cur_price, portion):
     usdt_trade = usdt_balance * portion
-    print(usdt_trade)
     amount = math.floor((usdt_trade * 1000) / cur_price) / 1000
-    print(amount)
     global amount_mode
     if amount_mode:
         if usdt_balance < cur_price * 0.001:
@@ -350,4 +348,5 @@ while True:
                             text='[오류 알림]\n' +
                              '----------------------------------------\n' +
                              str(e))
+            print(e)
             time.sleep(1)

@@ -201,14 +201,14 @@ def enter_position(exchange, symbol, cur_price, long_target, short_target, amoun
     if cur_price > long_target:
         position['type'] = 'long'
         position['amount'] = amount
-        enter_order = exchange.create_market_buy_order(symbol=symbol, amount=amount, params={'reduceOnly':False})
+        enter_order = exchange.create_order(symbol=symbol, type='market', side='buy', amount=amount, params={'reduceOnly':False})
         time.sleep(1)
         fetch_enter = exchange.fetch_order(id=enter_order['info']['orderId'], symbol=symbol)
         enter_info(fetch_enter)
     elif cur_price < short_target:
         position['type'] = 'short'
         position['amount'] = amount
-        enter_order = exchange.create_market_sell_order(symbol=symbol, amount=amount, params={'reduceOnly':False})
+        enter_order = exchange.create_order(symbol=symbol, type='market', side='sell', amount=amount, params={'reduceOnly':False})
         time.sleep(1)
         fetch_enter = exchange.fetch_order(id=enter_order['info']['orderId'], symbol=symbol)
         enter_info(fetch_enter)
@@ -219,13 +219,13 @@ def enter_position(exchange, symbol, cur_price, long_target, short_target, amoun
 def exit_position(exchange, symbol, position):
     amount = position['amount']
     if position['type'] == 'long':
-        exit_order = exchange.create_market_sell_order(symbol=symbol, amount=amount, params={'reduceOnly':True})
+        exit_order = exchange.create_order(symbol=symbol, type='market', side='sell', amount=amount, params={'reduceOnly':True})
         position['type'] = None
         time.sleep(1)
         fetch_exit = exchange.fetch_order(id=exit_order['info']['orderId'], symbol=symbol)
         exit_info(fetch_exit, enter_price)
     elif position['type'] == 'short':
-        exit_order = exchange.create_market_buy_order(symbol=symbol, amount=amount, params={'reduceOnly':True})
+        exit_order = exchange.create_order(symbol=symbol, type='market', side='buy', amount=amount, params={'reduceOnly':True})
         position['type'] = None
         time.sleep(1)
         fetch_exit = exchange.fetch_order(id=exit_order['info']['orderId'], symbol=symbol)
@@ -344,9 +344,10 @@ while True:
             time.sleep(1)
 
         except Exception as e:
+            print(e)
             bot.sendMessage(chat_id=id,
                             text='[오류 알림]\n' +
                              '----------------------------------------\n' +
                              str(e))
-            print(e)
+
             time.sleep(1)

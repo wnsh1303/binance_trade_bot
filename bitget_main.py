@@ -5,6 +5,7 @@ import pandas as pd
 import math
 import telegram
 from telegram.ext import Updater, CommandHandler
+import logging
 
 
 # 텔레그램 함수
@@ -238,8 +239,8 @@ def exit_position(exchange, symbol, position):
 
 
 # API 키 읽기
-api_key = ''
-secret = ''
+api_key = 'bg_20e9b1b4daa683360f7f2b21e25a258e'
+secret = '730d0fd42b32a42377a7f6a28556f7b42d04386159b0fd7ec26f9c3326a9de5c'
 bitget_password = 'wnwndl18'
 
 # 텔레그램
@@ -344,10 +345,10 @@ while True:
             time.sleep(1)
 
         except Exception as e:
-            print(e)
+            logging.exception(e)
             bot.sendMessage(chat_id=id,
                             text='[오류 알림]\n' +
-                             '----------------------------------------\n' +
-                             str(e))
+                             '----------------------------------------\n'
+                            )
 
             time.sleep(1)
